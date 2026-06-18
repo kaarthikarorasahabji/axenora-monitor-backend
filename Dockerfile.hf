@@ -1,0 +1,37 @@
+# Employee Monitoring Backend - Dockerfile for HuggingFace Spaces
+# Runs Express + Socket.IO on port 7860 (HF Spaces requirement)
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install production dependencies only
+RUN npm ci --omit=dev
+
+# Copy source code, migration assets, scripts, and the downloadable installer
+COPY src/ ./src/
+COPY db/ ./db/
+COPY scripts/ ./scripts/
+COPY dist/ ./dist/
+
+# Create uploads directory
+RUN mkdir -p uploads
+
+# HF Spaces already has uid 1000 (node user on alpine)
+RUN chown -R node:node /app
+USER node
+
+# HF Spaces expects port 7860
+EXPOSE 7860
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD wget -qO- http://localhost:7860/api/health || exit 1
+
+# Production settings
+ENV NODE_ENV=production
+ENV PORT=7860
+
+CMD ["node", "src/server.js"]

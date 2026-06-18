@@ -1,0 +1,2 @@
+dist/Axenora-WorkMonitor-Setup.exe filter=lfs diff=lfs merge=lfs -text
+dist/WorkMonitorAgent.exe filter=lfs diff=lfs merge=lfs -text
